@@ -1,4 +1,5 @@
 using System;
+using System.Reflection.PortableExecutable;
 using App3.WebApi.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,20 +28,31 @@ namespace App3.WebApi
             services.AddTransient<IRabbitRepository, RabbitRepository>();
 
             services.AddControllers().AddNewtonsoftJson();
-            services.AddOpenTelemetryTracing(builder =>
-            {
-                builder.AddAspNetCoreInstrumentation()
-                    .AddSource(nameof(RabbitRepository))
-                    .AddSqlClientInstrumentation()
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("App3"))
-                    .AddJaegerExporter(opts =>
-                    {
-                        opts.AgentHost = Configuration["Jaeger:AgentHost"];
-                        opts.AgentPort = Convert.ToInt32(Configuration["Jaeger:AgentPort"]);
-                    });
-            });
-
-
+            //services.AddOpenTelemetry(builder =>
+            //{
+            //    builder.AddAspNetCoreInstrumentation()
+            //        .AddSource(nameof(RabbitRepository))
+            //        .AddSqlClientInstrumentation()
+            //        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("App3"))
+            //        .AddJaegerExporter(opts =>
+            //        {
+            //            opts.AgentHost = Configuration["Jaeger:AgentHost"];
+            //            opts.AgentPort = Convert.ToInt32(Configuration["Jaeger:AgentPort"]);
+            //        });
+            //});
+            services.AddOpenTelemetry()
+                .WithTracing(builder =>
+                {
+                    builder.AddAspNetCoreInstrumentation()
+                        .AddSource(nameof(RabbitRepository))
+                        .AddSqlClientInstrumentation()
+                        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("App3"))
+                        .AddJaegerExporter(opts =>
+                        {
+                            opts.AgentHost = Configuration["Jaeger:AgentHost"];
+                            opts.AgentPort = Convert.ToInt32(Configuration["Jaeger:AgentPort"]);
+                        });
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

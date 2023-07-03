@@ -53,11 +53,16 @@ That's a problem because both App3 and App4 need to wait for the rabbitMq contai
 
 If you don't want to use the compose file you can use docker to start the dependencies manually, you can ran the following commands:
 
-- _docker run -d --name jaeger -e COLLECTOR_ZIPKIN_HTTP_PORT=19411 -p 5775:5775/udp -p 6831:6831/udp  -p 6832:6832/udp  -p 5778:5778   -p 16686:16686  -p 14268:14268  -p 19411:19411   jaegertracing/all-in-one_
-- _docker run -d --hostname my-rabbit --name some-rabbit -p 8082:15672 -p 5672:5672 rabbitmq:3.6.15-management_
-- _docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass@Word1" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04_
-- _docker run -d --name some-redis -p "6379:6379" redis:6.2.1_
+- _docker run -d --name jaeger -e COLLECTOR_ZIPKIN_HTTP_PORT=19411 -p 5775:5775/udp -p 6831:6831/udp  -p 6832:6832/udp  -p 5778:5778   -p 16686:16686  -p 14268:14268  -p 19411:19411   jaegertracing/all-in-one:lastest
+- docker run --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.11-management
+- docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass@Word1" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04_
+- docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
 
+Testing:
+Start: App1.WebApi -> App3.WebApi -> App2.RabbitConsumer.Console -> App4.RabbitConsumer.HostedService
+
+http://localhost:5000/http
+http://localhost:5000/publish-message
 
 # Output
 

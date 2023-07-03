@@ -27,19 +27,33 @@ namespace App1.WebApi
         {
             services.AddControllers();
             services.AddHttpClient();
-            services.AddOpenTelemetryTracing(builder =>
-            {
-                builder.AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddSource(nameof(PublishMessageController))
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("App1"))
-                    .AddJaegerExporter(opts =>
-                    {
-                        opts.AgentHost = Configuration["Jaeger:AgentHost"];
-                        opts.AgentPort = Convert.ToInt32(Configuration["Jaeger:AgentPort"]);
-                        opts.ExportProcessorType = ExportProcessorType.Simple;
-                    });
-            });
+            //services.AddOpenTelemetryTracing(builder =>
+            //{
+            //    builder.AddAspNetCoreInstrumentation()
+            //        .AddHttpClientInstrumentation()
+            //        .AddSource(nameof(PublishMessageController))
+            //        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("App1"))
+            //        .AddJaegerExporter(opts =>
+            //        {
+            //            opts.AgentHost = Configuration["Jaeger:AgentHost"];
+            //            opts.AgentPort = Convert.ToInt32(Configuration["Jaeger:AgentPort"]);
+            //            opts.ExportProcessorType = ExportProcessorType.Simple;
+            //        });
+            //});
+            services.AddOpenTelemetry()
+                .WithTracing(builder =>
+                {
+                    builder.AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddSource(nameof(PublishMessageController))
+                        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("App1"))
+                        .AddJaegerExporter(opts =>
+                        {
+                            opts.AgentHost = Configuration["Jaeger:AgentHost"];
+                            opts.AgentPort = Convert.ToInt32(Configuration["Jaeger:AgentPort"]);
+                            opts.ExportProcessorType = ExportProcessorType.Simple;
+                        });
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
